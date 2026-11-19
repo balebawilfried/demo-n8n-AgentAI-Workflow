@@ -36,10 +36,13 @@ Pour mettre en marche nos outils :
 - docker container ls 
 
 # Pour recreer nos conteneurs si vous vous êtes trompés dans l'ordre d'exécution
-docker compose up -d --force-recreate
+docker compose up -d --force-recreate nom_containeur
 
 # Modification des droits du fichier .env
 chmod 600 ./.env
+
+# Lister les modèles disponibles
+docker exec -it ollama ollama list
 ```
 3) Ajout de modèle de Ollama à n8n
 Nous allons nous rendre dans la configuration de Ollama Chat Model et au niveau de url nous allons renseigner **https:ollama:11434**. Au lieu d'utiliser l'ip du containeur, nous allons plus tôt utiliser son nom vu qu'ils sont dans le même réseau. 
@@ -50,9 +53,6 @@ Nous allons nous rendre dans la configuration de Ollama Chat Model et au niveau 
 docker exec -it ollama ollama pull llama3.2
 docker exec -it ollama ollama pull qwen2.5:3b
 docker exec -it ollama ollama pull mistral
-
-# Lister les modèles disponibles
-docker exec -it ollama ollama list
 
 # Télécharger un autre modèle plus tard
 docker exec -it ollama ollama pull deepseek-r1:1.5b

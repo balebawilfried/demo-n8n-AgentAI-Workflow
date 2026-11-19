@@ -27,33 +27,35 @@ services:
       #- N8N_SSL_KEY: /certs/privkey.pem
 
       # Credential
-      - DB_TYPE=${DB_TYPE}
-      - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
-      - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
-      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
-      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
+      #- DB_TYPE=${DB_TYPE}
+      #- DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
+      #- DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
+      #- DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
+      #- DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
       
     volumes:
       - n8n_data:/home/node/.n8n
       - ./local-files:/files
       - ./certs:/certs:ro
     depends_on:
-      - postgres
-    networks:
-      - ai_network
+      #- postgres
+      ollama:
+        condition: service_healthy
+    #networks:
+      #- ai_network
   
-  postgres:
-    image: postgres:16
-    container_name: ai-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_POSTGRESDB_DATABASE}
-      POSTGRES_USER: ${DB_POSTGRESDB_USER}
-      POSTGRES_PASSWORD: ${DB_POSTGRESDB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - ai_network
+  #postgres:
+    #image: postgres:16
+    #container_name: ai-postgres
+    #restart: unless-stopped
+    #environment:
+      #POSTGRES_DB: ${DB_POSTGRESDB_DATABASE}
+      #POSTGRES_USER: ${DB_POSTGRESDB_USER}
+      #POSTGRES_PASSWORD: ${DB_POSTGRESDB_PASSWORD}
+    #volumes:
+      #- postgres_data:/var/lib/postgresql/data
+    #networks:
+      #- ai_network
 
 
   # =====================================
@@ -67,30 +69,77 @@ services:
     volumes:
       - ollama_data:/root/.ollama
 
-    # Facultatif : accès depuis Ubuntu uniquement
-    expose:
-      - 11434
-
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
 
-    entrypoint: ["/bin/sh", "-c"]
+    # API accessible uniquement depuis la machine virtuel.
+    # n8n utilise le réseau Docker interne.
+    ports:
+      - "127.0.0.1:11434:11434"
 
+    # Démarrage du serveur et installation initiale des modèles.
+    entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        echo "Attente du démarrage d'Ollama..."
+        set -eu
+
+        echo "Demarrage du serveur Ollama..."
+
+        ollama serve &
+        OLLAMA_PID=$$!
+
+        trap 'kill "$$OLLAMA_PID" 2>/dev/null || true' TERM INT
+
+        echo "Attente de la disponibilite de l'API Ollama..."
 
         until ollama list >/dev/null 2>&1; do
-          sleep 5
+          sleep 3
         done
 
-        echo "Téléchargement des modèles..."
+        echo "API Ollama disponible."
 
-        ollama serve
+        if [ ! -f /root/.ollama/.models-ready ]; then
 
-        ollama pull llama3.2
+          echo "Installation des modeles..."
 
-        echo "Tous les modèles sont prêts."
+          # Assistant généraliste et agent léger
+          ollama pull llama3.2
+
+          #Classification de sécurité des entrées et sorties
+          #ollama pull llama-guard3:8b
+          
+          # Agent pour des tâches de raisonnement plus complexes
+          # ollama pull glm-4.7-flash
+
+          # Classification, extraction et automatisation. Modèle léger d'automatisation et de comparaison expérimentale.
+          # ollama pull qwen2.5:3b
+
+          #Tests comparatifs de sécurité
+          # ollama pull ministral-3:8b
+
+
+          touch /root/.ollama/.models-ready
+
+          echo "Installation des modeles terminee."
+
+        else
+          echo "Les modeles ont deja ete initialises."
+        fi
+
+        echo "Modeles disponibles :"
+        ollama list
+
+        wait "$$OLLAMA_PID"
+
+    # Ollama est considéré sain lorsque les modèles sont installés.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "test -f /root/.ollama/.models-ready && ollama list >/dev/null 2>&1"
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
     #networks:
       #- ai-network
