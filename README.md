@@ -45,7 +45,6 @@ chmod 600 ./.env
 Nous allons nous rendre dans la configuration de Ollama Chat Model et au niveau de url nous allons renseigner **https:ollama:11434**. Au lieu d'utiliser l'ip du containeur, nous allons plus tôt utiliser son nom vu qu'ils sont dans le même réseau. 
 
 4) Ajout et suppression de modèles de LLM à notre Ollama
-
 ```powershell
 # Télécharger les modèles
 docker exec -it ollama ollama pull llama3.2
@@ -62,7 +61,14 @@ docker exec -it ollama ollama pull deepseek-r1:1.5b
 docker exec -it ollama ollama rm mistral
 ```
 
-4) Accéder à l'interface graphique de vos outils :
+5) Recréation du conteneur après les modifications 
+
+```powershell
+# Recréer le conteneur Ollama
+docker compose up -d --force-recreate ollama
+```
+
+6) Accéder à l'interface graphique de vos outils :
     - Pour n8n : http://votre_ipv4:5678
     - Pour ollama : http://votre_ipv4:11434
   
