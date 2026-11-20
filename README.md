@@ -4,17 +4,18 @@
 
 
 ### I- PERIMETRE 
-Ce projet ce structure en deux une partie de collecte avec prometheus et une autre avec Grafana pour une collecte de logs et une visuation via des dashbord des données collectées pour l'ensemble de l'ensemble collecté. Pour ce lab nous sommes limités à un seul un serveur qui jouera à la fois le rôle de serveur de monitoring et de serveur d'application. Bien que dans la pratique (production), nous pouvons avoir des serveurs d'applications des serveurs de monitoring (SOC ou NOC). Il ne s'agit pas de monitroing __d'équipements réseau__ (switch, routeur, parefeu, etc). 
+Ce projet ce structure en plusieurs partie. Il vise la simulation d'agent et workflow ayant plusieurs finalité (sécurité des agents, red teaming, soc agentic, etc...) 
 
 <p align="center">
-  <img src="./images/n8n.png" width="45%">
+  <img src="./images/n8n1.png" width="45%">
+  <img src="./images/n8n2.png" width="45%">
 </p>
 
 
 ### II- PREREQUIS
 Bien que ce readme a pour but de donner des indications sur comment le reproduire, ainsi que les commentaires dans les fichiers yaml (.yml) qui vise à faciliter la compréhension. Il est important que vous ayez des notions en **containeurisation, orchestration de container, langage yml, prompt engineering, etc**. Il faut aussi avoir installé et configuré sur une **VM/VPS/VDS** Linux le necessaire suivant :
 - Docker et Docker compose ;
-- tree ;
+- tree. 
 
 
 

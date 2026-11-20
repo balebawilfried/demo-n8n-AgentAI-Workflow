@@ -36,7 +36,7 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ./local-files:/files
-      - ./certs:/certs:ro
+      #- ./certs:/certs:ro
     depends_on:
       #- postgres
       ollama:
@@ -77,7 +77,8 @@ services:
     ports:
       - "127.0.0.1:11434:11434"
 
-    # Démarrage du serveur et installation initiale des modèles.
+    # Démarrage du serveur et installation initiale des modèles. O
+    # On conservera la partie entrypoint et command pour un déploiement en ligne sur un VPS. 
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
